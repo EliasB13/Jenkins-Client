@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -38,34 +39,6 @@ namespace Jenkins
                 if (!string.IsNullOrEmpty(realJobName))
                 {
                     job = await GetJobByNameExtendedAsync(realJobName);
-                }
-            }
-
-            return job;
-        }
-
-        private async Task<Job?> GetJobByNameExtendedAsync1(string nameToFind)
-        {
-            Job? job = null;
-
-            if (!string.IsNullOrEmpty(nameToFind))
-            {
-                var uri = $"{Constants.JenkinsBaseUri}/job/{nameToFind}/api/json?tree=name,builds[number,timestamp,id,result]";
-
-                var response = await requestSender.GetAsync(uri, HttpMethod.Get);
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    job = JsonConvert.DeserializeObject<Job>(content);
-
-                    if (job?.Builds?.Count > 0 && !string.IsNullOrEmpty(job?.Name))
-                    {
-                        job.Builds.ForEach(build =>
-                        {
-                            build.JobName = job.Name;
-                            build.Version = ParseBuildVersion(build);
-                        });
-                    }
                 }
             }
 
@@ -175,7 +148,7 @@ namespace Jenkins
             return jobsList;
         }
 
-        public void DownloadArtifactsAsync(string uri, string fileName, Action<string>? downloadEndedAction = null)
+        public void DownloadArtifactsAsync(string uri, string fileName, Action<string, string>? downloadEndedAction = null)
         {
             _ = Task.Run(async () =>
             {
@@ -184,12 +157,14 @@ namespace Jenkins
                     var response = await requestSender.GetAsync(uri, HttpMethod.Get);
                     if (response.IsSuccessStatusCode)
                     {
-                        using (var fileStream = new FileStream(@$"{downloadsPath}\{fileName}.zip", FileMode.Create))
+                        var downloadedFilePath = @$"{downloadsPath}\{fileName}.zip";
+
+                        using (var fileStream = new FileStream(downloadedFilePath, FileMode.Create))
                         {
                             await response.Content.CopyToAsync(fileStream);
-
-                            downloadEndedAction?.Invoke(fileName);
                         }
+
+                        downloadEndedAction?.Invoke(fileName, downloadedFilePath);
                     }
                 }
             });

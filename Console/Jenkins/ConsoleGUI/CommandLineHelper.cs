@@ -44,8 +44,8 @@ namespace Jenkins.ConsoleGUI
             Console.WriteLine($"Also you can provide optional arguments: \n");
             Console.WriteLine($"\t {DownloadsFolderArgument}  [string] (Path to folder where downloaded build will have been located) \n");
             Console.WriteLine($"\t {GetLatestBuildArgument}  (If present latest job build will have been downloaded) \n");
-            Console.WriteLine($"\t {ZipBuildArgument}  (If present downloaded build will be archived in .zip) (If -z/-nz weren't specified then .zip will have been downloaded \n");
-            Console.WriteLine($"\t {UnzipBuildArgument} (If present downloaded build will have been unarchived) \n");
+            Console.WriteLine($"\t {ZipBuildArgument}  (If present downloaded build will be archived in .zip) (If -z/-nz weren't specified then .zip will have been extracted \n");
+            Console.WriteLine($"\t {UnzipBuildArgument} (If present downloaded build will have been extracted) \n");
             Console.WriteLine($"\t {AutoOpenArgument}  (If present downloads folder will have been opened when downloading ends) \n");
             Console.WriteLine($"\t {InteractiveModeArgument}  (If present application will run in interactive mode) \n");
         }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO.Compression;
+using System.Text;
 using System.Web;
 using Jenkins.ConsoleGUI;
 using Jenkins.Extensions;
@@ -178,9 +179,26 @@ namespace Jenkins
             jenkins.DownloadArtifactsAsync(downloadUri, fileName, OnDownloadEnded);
         }
 
-        private static void OnDownloadEnded(string fileName)
+        private static void OnDownloadEnded(string fileName, string path)
         {
             menu.WriteLine($"{fileName} has downloaded!");
+
+            var isUnzipArgumentPresent = commandLineArgs.ContainsKey(CommandLineHelper.UnzipBuildArgument);
+            var isZipArgumentPresent = commandLineArgs.ContainsKey(CommandLineHelper.ZipBuildArgument);
+
+            if ((isUnzipArgumentPresent || !isZipArgumentPresent) && !string.IsNullOrEmpty(path))
+            {
+                try
+                {
+                    var extractFolder = Path.GetDirectoryName(path);
+
+                    if (!string.IsNullOrEmpty(extractFolder))
+                    {
+                        ZipFile.ExtractToDirectory(path, extractFolder, true);
+                    }
+                }
+                catch (Exception) { }
+            }
         }
 
         private static string? GetPackageSubFolderName(List<Artifact> artifacts, string bitDepth)

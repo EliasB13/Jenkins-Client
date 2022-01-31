@@ -28,7 +28,7 @@ namespace Jenkins
             var requestMessage = new HttpRequestMessage(method, uri);
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encodedAuthString);
 
-            return await httpClient.SendAsync(requestMessage);
+            return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
         }
     }
 }

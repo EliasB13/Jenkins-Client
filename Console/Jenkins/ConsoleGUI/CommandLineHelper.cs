@@ -9,7 +9,7 @@ namespace Jenkins.ConsoleGUI
     public static class CommandLineHelper
     {
         public const string JobNameArgument = "-n";
-        public const string AutoOpenArgument = "-o";
+        public const string OpenFolderArgument = "-o";
         public const string ZipBuildArgument = "-z";
         public const string UnzipBuildArgument = "-nz";
         public const string GetLatestBuildArgument = "-l";
@@ -24,7 +24,7 @@ namespace Jenkins.ConsoleGUI
 
         public static List<string> NoValueArguments = new()
         {
-            AutoOpenArgument,
+            OpenFolderArgument,
             ZipBuildArgument,
             UnzipBuildArgument,
             GetLatestBuildArgument,
@@ -46,7 +46,7 @@ namespace Jenkins.ConsoleGUI
             Console.WriteLine($"\t {GetLatestBuildArgument}  (If present latest job build will have been downloaded) \n");
             Console.WriteLine($"\t {ZipBuildArgument}  (If present downloaded build will be archived in .zip) (If -z/-nz weren't specified then .zip will have been extracted \n");
             Console.WriteLine($"\t {UnzipBuildArgument} (If present downloaded build will have been extracted) \n");
-            Console.WriteLine($"\t {AutoOpenArgument}  (If present downloads folder will have been opened when downloading ends) \n");
+            Console.WriteLine($"\t {OpenFolderArgument}  (If present downloads folder will have been opened when downloading ends) \n");
             Console.WriteLine($"\t {InteractiveModeArgument}  (If present application will run in interactive mode) \n");
         }
 

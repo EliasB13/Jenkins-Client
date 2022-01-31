@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Diagnostics;
+using System.IO.Compression;
 using System.Text;
 using System.Web;
 using Jenkins.ConsoleGUI;
@@ -171,30 +172,75 @@ namespace Jenkins
             }
         }
 
-        public static void DownloadArtifacts(string downloadUri, string fileName)
+        public static void DownloadArtifacts(string downloadUri, string artifactName)
         {
             menu.WriteLine(string.Empty);
             menu.WriteLine("Downloading started in background");
 
-            jenkins.DownloadArtifactsAsync(downloadUri, fileName, OnDownloadEnded);
+            jenkins.DownloadArtifactsAsync(downloadUri, artifactName, OnDownloadEnded);
         }
 
-        private static void OnDownloadEnded(string fileName, string path)
+        private static void OnDownloadEnded(string artifactName, string path)
         {
-            menu.WriteLine($"{fileName} has downloaded!");
+            menu.WriteLine($"{artifactName} has downloaded!");
 
+            if (NeedToExtractZip())
+            {
+                ExtractZipArtifacts(path, artifactName);
+
+                if (NeedToOpenDownloadedFolder())
+                {
+                    OpenDownloadedFolder(path, artifactName);
+                }
+            }
+        }
+
+        private static bool NeedToExtractZip()
+        {
             var isUnzipArgumentPresent = commandLineArgs.ContainsKey(CommandLineHelper.UnzipBuildArgument);
             var isZipArgumentPresent = commandLineArgs.ContainsKey(CommandLineHelper.ZipBuildArgument);
 
-            if ((isUnzipArgumentPresent || !isZipArgumentPresent) && !string.IsNullOrEmpty(path))
+            return isUnzipArgumentPresent || !isZipArgumentPresent;
+        }
+
+        private static bool NeedToOpenDownloadedFolder()
+        {
+            return commandLineArgs.ContainsKey(CommandLineHelper.OpenFolderArgument);
+        }
+
+        private static void ExtractZipArtifacts(string path, string artifactName)
+        {
+            if (!string.IsNullOrEmpty(path))
             {
                 try
                 {
-                    var extractFolder = Path.GetDirectoryName(path);
+                    var downloadedArtifactFolder = Path.GetDirectoryName(path);
 
-                    if (!string.IsNullOrEmpty(extractFolder))
+                    if (!string.IsNullOrEmpty(downloadedArtifactFolder))
                     {
-                        ZipFile.ExtractToDirectory(path, extractFolder, true);
+                        var extractFolder = Path.Combine(downloadedArtifactFolder, artifactName);
+
+                        if (!string.IsNullOrEmpty(extractFolder))
+                        {
+                            ZipFile.ExtractToDirectory(path, extractFolder, true);
+                        }
+                    }
+                }
+                catch (Exception) { }
+            }
+        }
+
+        private static void OpenDownloadedFolder(string path, string artifactName)
+        {
+            if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(artifactName))
+            {
+                try
+                {
+                    var downloadedArtifactFolder = Path.GetDirectoryName(path);
+
+                    if (!string.IsNullOrEmpty(downloadedArtifactFolder))
+                    {
+                        Process.Start("explorer.exe", Path.Combine(downloadedArtifactFolder, artifactName));
                     }
                 }
                 catch (Exception) { }
